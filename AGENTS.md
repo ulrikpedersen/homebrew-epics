@@ -256,3 +256,22 @@ The following are **not** exposed by the MCP server and still require the termin
 > **Note on `mcp_homebrew_tests`**: this runs Homebrew's own internal Ruby unit
 > tests, not a formula's `test do` block. Use `brew test <formula>` in the terminal
 > to exercise a formula's test block.
+
+---
+
+## 8. Homebrew Documentation — Consult Before Guessing
+
+When you are uncertain about correct formula syntax, encounter an unfamiliar `brew`
+error, or are working on a difficult new formula, **stop and consult the official
+Homebrew documentation** before attempting random fixes. The docs resolve the vast
+majority of packaging questions authoritatively.
+
+Use `fetch_webpage` to read the relevant page, or open it in a browser.
+
+| Topic | URL |
+|-------|-----|
+| Documentation home | https://docs.brew.sh/ |
+| Formula Cookbook (primary reference) | https://docs.brew.sh/Formula-Cookbook |
+| Taps | https://docs.brew.sh/Taps |
+| Using keg-only deps outside Homebrew | https://docs.brew.sh/How-to-Build-Software-Outside-Homebrew-with-Homebrew-keg-only-Dependencies |
+| Interesting taps & real-world examples | https://docs.brew.sh/Interesting-Taps-and-Forks |

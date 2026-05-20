@@ -22,3 +22,5 @@ authoring rules, quality gates, and the commit message format.
 | configure/RELEASE reference | [skills/brew-formula/configure-release.md](skills/brew-formula/configure-release.md) |
 | RPATH / dylib notes | [skills/brew-formula/rpath-notes.md](skills/brew-formula/rpath-notes.md) |
 | Annotated example formula | [skills/brew-formula/exemplar-formula.rb](skills/brew-formula/exemplar-formula.rb) |
+| Homebrew documentation | https://docs.brew.sh/ |
+| Homebrew Formula Cookbook | https://docs.brew.sh/Formula-Cookbook |
