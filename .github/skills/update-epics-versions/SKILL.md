@@ -82,7 +82,7 @@ Record the **exact tag string** and derive the Homebrew dotted version:
 Record the URL in `EPICS_VERSIONS.md` per-package section so future agents use the
 correct pattern for this module.
 
-**Compute the sha256** (still requires a download):
+**Compute the sha256** — use `run_in_terminal` to run:
 ```sh
 curl -fsSL <archive-url> | shasum -a 256
 ```
@@ -93,7 +93,7 @@ The user has provided the repository URL directly. Ask for or confirm:
 - The target version tag and its human-readable version string
 - The archive URL for that release
 
-Then compute the sha256:
+Then compute the sha256 — use `run_in_terminal` to run:
 ```sh
 curl -fsSL <archive-url> | shasum -a 256
 ```
@@ -118,7 +118,8 @@ Inspect `configure/RELEASE` at the new tag:
 **GitHub modules**: use `mcp_github_get_file_contents` with `owner`, `repo`,
 `path: "configure/RELEASE"`, and `ref: <tag>`.
 
-**Non-GitHub modules**:
+**Non-GitHub modules**: use `fetch_webpage` with the raw file URL if available,
+otherwise use `run_in_terminal`:
 ```sh
 curl -fsSL <repo-base-url>/raw/<tag>/configure/RELEASE
 ```

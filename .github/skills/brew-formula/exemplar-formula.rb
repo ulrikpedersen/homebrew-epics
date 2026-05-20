@@ -29,6 +29,10 @@ class EpicsAsyn < Formula
   # ---------------------------------------------------------------------------
   url "https://github.com/epics-modules/asyn/archive/refs/tags/R4-44-2.tar.gz"
   sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"  # replace with real hash
+  # version is only needed when Homebrew cannot parse it from the URL.
+  # For most GitHub archive URLs the version is embedded in the filename and
+  # can be inferred automatically. Including a redundant version line causes
+  # `brew audit --strict` to warn: omit it unless inference fails.
   version "4.44.2"
 
   # ---------------------------------------------------------------------------
@@ -47,18 +51,21 @@ class EpicsAsyn < Formula
   # ---------------------------------------------------------------------------
   # Bottle block — pre-built binaries distributed via GHCR.
   # Rule: root_url must point to the organisation's GHCR namespace.
-  # Rule: cellar :any for formulae that install .dylib / .so shared libraries.
-  #       Use cellar :any_skip_relocation only for static-only builds.
+  # Rule: Do NOT include a `cellar` line. The cellar annotation was removed in
+  #       Homebrew 4.x; including it causes `brew audit` to error with
+  #       `undefined method 'cellar'`. Homebrew now infers relocatability
+  #       automatically during `brew test-bot` bottling.
   # Rule: All six platform sha256 entries are required. CI fills in real hashes.
+  #       Placeholders must be valid 64-character hex strings (e.g. all-zeros);
+  #       text like "placeholder_until_ci_runs" fails audit.
   # ---------------------------------------------------------------------------
   bottle do
     root_url "https://ghcr.io/v2/<org>/homebrew-epics"
-    cellar :any  # asyn installs libasyn.dylib — must be :any
-    sha256 arm64_tahoe:   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-    sha256 arm64_sequoia: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
-    sha256 arm64_sonoma:  "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
-    sha256 sonoma:        "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
-    sha256 arm64_linux:   "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    sha256 arm64_tahoe:   "0000000000000000000000000000000000000000000000000000000000000000"
+    sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
+    sha256 arm64_sonoma:  "0000000000000000000000000000000000000000000000000000000000000000"
+    sha256 sonoma:        "0000000000000000000000000000000000000000000000000000000000000000"
+    sha256 arm64_linux:   "0000000000000000000000000000000000000000000000000000000000000000"
     sha256 x86_64_linux:  "0000000000000000000000000000000000000000000000000000000000000000"
   end
 

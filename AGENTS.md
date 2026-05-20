@@ -122,31 +122,33 @@ These formulae are not linked against by other formulae, and users typically ins
 only one version at a time. Omit `keg_only` for app-style formulae unless there is a
 specific, documented conflict reason.
 
-### 1.7 Bottle annotations: `cellar: :any` vs `cellar: :any_skip_relocation`
+### 1.7 Bottle block format
 
-| Situation | Cellar annotation |
-|-----------|-------------------|
-| Formula installs `.dylib` / `.so` shared libraries | `cellar: :any` |
-| Formula is static-only (`.a` files, headers, scripts) | `cellar: :any_skip_relocation` |
-| Formula installs a mix (prefer conservative choice) | `cellar: :any` |
+The `cellar` annotation (`cellar :any`, `cellar :any_skip_relocation`) was **removed
+in Homebrew 4.x**. Do not include a `cellar` line in bottle blocks — `brew audit`
+will error with `undefined method 'cellar'`. Homebrew now infers relocatability
+automatically during `brew test-bot` bottling.
 
-All EPICS formulae that link to other EPICS modules produce shared libraries and must
-use `cellar: :any`. The bottle `root_url` must point to GHCR:
+The bottle `root_url` must point to GHCR, and all six platform sha256 entries are
+required. Use 64-character hex placeholder strings until CI fills in the real hashes:
 
 ```ruby
 bottle do
   root_url "https://ghcr.io/v2/<org>/homebrew-epics"
-  cellar :any
-  sha256 arm64_tahoe:   "..."
-  sha256 arm64_sequoia: "..."
-  sha256 arm64_sonoma:  "..."
-  sha256 sonoma:        "..."
-  sha256 arm64_linux:   "..."
-  sha256 x86_64_linux:  "..."
+  sha256 arm64_tahoe:   "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 arm64_sonoma:  "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 sonoma:        "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 arm64_linux:   "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 x86_64_linux:  "0000000000000000000000000000000000000000000000000000000000000000"
 end
 ```
 
 Replace `<org>` with the actual GitHub organisation hosting this tap.
+
+> **Note on sha256 placeholders**: the strings above must be valid 64-character hex
+> values. Text like `"placeholder_until_ci_runs"` fails audit with
+> `Invalid sha256 hash`. All-zeros or all-`a` strings are acceptable stand-ins.
 
 ---
 

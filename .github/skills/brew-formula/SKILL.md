@@ -77,38 +77,33 @@ The regex **must** capture only the numeric portion (the capture group), not the
 tag. Homebrew's livecheck compares the captured value against the formula's `version`
 field after normalising separators (`.` and `-` are treated as equivalent).
 
-Test the livecheck before finalising the formula:
+Test the livecheck before finalising the formula. There is no MCP tool for
+`brew livecheck` — use the terminal:
 ```sh
-brew livecheck Formula/epics-<name>.rb --verbose
+brew livecheck --tap local/epics --verbose
 ```
 
 ### Step 4 — Write the bottle block
 
-All formulae use GHCR and target six platforms:
+All formulae use GHCR and target six platforms. The `cellar` annotation was **removed
+in Homebrew 4.x** — do not include it; `brew audit` will error. Homebrew now infers
+relocatability automatically during `brew test-bot` bottling.
 
 ```ruby
 bottle do
   root_url "https://ghcr.io/v2/<org>/homebrew-epics"
-  cellar :any          # use :any_skip_relocation only if truly no shared libs
-  sha256 arm64_sequoia: "placeholder_until_ci_runs"
+  sha256 arm64_tahoe:   "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 arm64_sonoma:  "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 sonoma:        "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 arm64_linux:   "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 x86_64_linux:  "0000000000000000000000000000000000000000000000000000000000000000"
 end
 ```
 
-Real SHA256 hashes are filled in by `brew test-bot` during CI. Leave placeholders
-in new formulae — CI will update them.
-
-**Cellar annotation decision table**:
-
-| Formula installs | Cellar annotation |
-|-----------------|-------------------|
-| `.dylib` / `.so` shared libraries | `cellar :any` |
-| Only `.a` static libraries + headers | `cellar :any_skip_relocation` |
-| Mixed (shared + static) | `cellar :any` |
-| Scripts / pure Ruby | `cellar :any_skip_relocation` |
-
-All EPICS support modules install shared libraries. Use `cellar :any` unless you
-have verified with `otool -L` (macOS) or `ldd` (Linux) that no `.dylib`/`.so` files
-are installed.
+Real SHA256 hashes are filled in by `brew test-bot` during CI. Use 64-character
+hex placeholder strings (e.g. all-zeros) — text like `"placeholder_until_ci_runs"`
+fails audit with `Invalid sha256 hash`.
 
 ### Step 5 — Add `keg_only` (support modules only)
 
@@ -182,19 +177,30 @@ test do
   else
     Hardware::CPU.arm? ? "linux-aarch64" : "linux-x86_64"
   end
-  assert_predicate lib/"#{epics_arch}"/shared_library("lib<name>"), :exist?
+  assert_path_exists lib/epics_arch.to_s/shared_library("lib<name>")
 end
 ```
 
 Replace `"lib<name>"` with the library the module builds (e.g. `"libasyn"`, `"libbusy"`).
 `shared_library` returns `"lib<name>.dylib"` on macOS and `"lib<name>.so"` on Linux.
 
-### Step 9 — Run `brew audit --strict` and fix all issues
+> **Audit note**: use `assert_path_exists <path>` rather than
+> `assert_predicate <path>, :exist?` — `brew audit --strict` flags the latter.
+> Also use `epics_arch.to_s` when joining Pathname segments, not `"#{epics_arch}"`
+> — audit flags string interpolation inside Pathname chains.
+
+### Step 9 — Check style and run `brew audit --strict`
+
+**Step 9a — Style check via MCP tool** (preferred): call `mcp_homebrew_style` with
+`formula: "local/epics/epics-<name>"` (and optionally `fix: true` to auto-correct).
+This runs RuboCop and is faster than the full audit.
+
+**Step 9b — Full audit via CLI** (required — no MCP equivalent):
 
 ```sh
-brew audit --strict Formula/epics-<name>.rb
+brew audit --strict local/epics/epics-<name>
 # For new formulae:
-brew audit --strict --new Formula/epics-<name>.rb
+brew audit --strict --new local/epics/epics-<name>
 ```
 
 Fix every warning and error before declaring the formula ready. The most common
@@ -203,9 +209,19 @@ section 5.
 
 ### Step 10 — Verify the build
 
+Install via MCP tool (preferred): call `mcp_homebrew_install` with
+`formula_or_cask: "local/epics/epics-<name>"`. Add `--build-bottle` if you need a
+bottleable build — but note the MCP tool may not pass that flag; fall back to CLI:
+
 ```sh
-brew install --build-bottle Formula/epics-<name>.rb
-brew test Formula/epics-<name>.rb
+brew install --build-bottle local/epics/epics-<name>
+```
+
+Then run the formula's `test do` block. There is no MCP equivalent for this — the
+`mcp_homebrew_tests` tool runs Homebrew's own internal tests, not formula test blocks:
+
+```sh
+brew test local/epics/epics-<name>
 ```
 
 ---
@@ -220,7 +236,7 @@ Before finishing a formula, confirm every item is present:
 - [ ] `sha256` — SHA256 of the source tarball
 - [ ] `version` — dotted version string (e.g. `"4.44.2"`)
 - [ ] `livecheck` block with `:github_latest` strategy and correct regex
-- [ ] `bottle do` block with `root_url`, `cellar`, and all six platform sha256 entries
+- [ ] `bottle do` block with `root_url` and all six platform sha256 entries as valid 64-char hex (no `cellar` line)
 - [ ] `keg_only :versioned_formula` (required for Base/support modules; omit for GUI app formulae)
 - [ ] `depends_on` for all dependencies (correct `:build` qualifiers)
 - [ ] `configure/RELEASE.local` written with all dependency paths (`opt_prefix`)
@@ -236,9 +252,13 @@ Before finishing a formula, confirm every item is present:
 |---------|-----------------|
 | Using `Formula["epics-base"].prefix` in RELEASE.local | Use `.opt_prefix` |
 | Omitting the livecheck block | Always include it |
-| `cellar :any_skip_relocation` on a formula with `.dylib` files | Use `cellar :any` |
-| `test do` only checks `--version` or omits library assertion | Use `assert_predicate lib/arch/shared_library("lib<name>")` |
+| Including `cellar :any` in the bottle block | Remove it — `cellar` was removed in Homebrew 4.x; audit errors with `undefined method 'cellar'` |
+| sha256 placeholder is not valid hex (e.g. `"placeholder_until_ci_runs"`) | Use a 64-character hex string such as all-zeros |
+| `test do` uses `assert_predicate <path>, :exist?` | Use `assert_path_exists <path>` |
+| `test do` uses `"#{epics_arch}"` inside a Pathname chain | Use `epics_arch.to_s` |
+| Including a redundant `version` line when Homebrew can parse it from the URL | Omit `version` — audit flags it as redundant |
 | Leaving `AUTOSAVE=`, `SSCAN=` etc. pointing at nonexistent paths | Comment them out |
 | `depends_on "gcc"` | Remove — use Apple Clang |
 | Hardcoding `/opt/homebrew` | Use `Formula[...].opt_prefix` or `opt_prefix` |
 | Forgetting `revision` bump when epics-base changes | Always check dependent formulae |
+| Running `brew audit Formula/<name>.rb` (path argument) | Path arguments are disabled; tap locally first: `brew tap local/epics /path/to/repo`, then `brew audit --strict local/epics/<name>` |

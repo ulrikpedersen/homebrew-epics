@@ -180,10 +180,16 @@ regex will result in false positives or missed updates.
 
 ## 5. `brew audit --strict` checklist
 
-Before declaring any formula done, run:
+Before declaring any formula done, run `brew audit`. **Path arguments to `brew audit`
+are disabled** in modern Homebrew — you must register a local tap first:
 
 ```sh
-brew audit --strict Formula/epics-<name>.rb
+# One-time setup: register the local repo as a tap
+brew tap local/epics /path/to/homebrew-epics
+
+# Then audit by name
+brew audit --strict local/epics/epics-<name>
+brew audit --strict --new local/epics/epics-<name>   # for new formulae
 ```
 
 Common audit failures in EPICS formulae and how to fix them:
@@ -193,38 +199,39 @@ Common audit failures in EPICS formulae and how to fix them:
 | `Livecheck block is missing` | Add a `livecheck do ... end` block |
 | `"keg_only" reason is not `:versioned_formula`` | Change reason to `:versioned_formula` |
 | `Bottle block is missing` | Add a `bottle do ... end` block |
-| `cellar: :any_skip_relocation` on a dylib | Change to `cellar: :any` |
+| `undefined method 'cellar'` | Remove the `cellar` line — it was removed in Homebrew 4.x |
+| `Invalid sha256 hash` | Bottle sha256 placeholders must be 64-character hex; use all-zeros |
+| `version X.Y.Z is redundant with version scanned from URL` | Remove the `version` line when Homebrew can parse it from the URL |
+| `Use assert_path_exists` | Replace `assert_predicate <path>, :exist?` with `assert_path_exists <path>` |
+| `Prefer 'to_s' over string interpolation` | Use `epics_arch.to_s` in Pathname chains instead of `"#{epics_arch}"` |
 | `Depends on formula in same tap without tap name` | Use `depends_on "epics-asyn"` (no tap prefix needed within the tap) |
-| `test block does not compile or run code` | Replace `--version` check with a compiled C test |
 | `URL not using HTTPS` | Fix the `url` and `homepage` to use `https://` |
 | `Formula class name does not match filename` | Rename class to match: `epics-asyn.rb` → `class EpicsAsyn` |
 | `Hardcoded path in formula` | Replace with `opt_prefix` or `Formula[...].opt_prefix` |
 
-The `--new` flag adds extra checks for new formulae (unique description, etc.):
-
-```sh
-brew audit --strict --new Formula/epics-asyn.rb
-```
+The `--new` flag adds extra checks for new formulae (unique description, etc.).
 
 ---
 
-## 6. Shared library annotations: `cellar: :any` vs `:any_skip_relocation`
+## 6. Shared library relocatability (Homebrew 4.x+)
 
-Homebrew bottle annotations control whether a bottle can be relocated to a different
-Cellar path without modification.
+Prior to Homebrew 4.x, formulae declared relocatability via a `cellar` annotation
+inside the `bottle do` block (`cellar :any` or `cellar :any_skip_relocation`). That
+field was **removed** — including it now causes `brew audit` to fail with
+`undefined method 'cellar'`.
 
-- **`cellar: :any`**: The bottle contains absolute paths to shared libraries that
-  `brew bottle` has rewritten to use `@rpath` or `@loader_path`. The bottle works
-  anywhere Homebrew is installed, but the `.dylib` files must stay in the Cellar.
-  Use this for all formulae that install `.dylib` files.
+Homebrew 4.x+ determines relocatability automatically during `brew test-bot` bottling
+by inspecting the built binaries. The concepts still apply, but they are no longer
+declared in formula Ruby:
 
-- **`cellar: :any_skip_relocation`**: The bottle contains no absolute Cellar paths.
-  It can be unzipped anywhere and will work. Use this only for formulae that install
-  only static libraries, headers, or scripts with no compiled binaries.
+- **Relocatable** (formerly `cellar :any_skip_relocation`): no absolute Cellar paths
+  baked into any installed file. Can be unzipped anywhere.
+- **Non-relocatable** (formerly `cellar :any`): shared libraries contain absolute paths
+  that `brew bottle` rewrites to `@rpath`-relative (macOS) or `$ORIGIN`-relative
+  (Linux). All EPICS formulae that install `.dylib`/`.so` files fall into this category.
 
-All EPICS formulae that build shared libraries (virtually all of them) must use
-`cellar: :any`. If a formula genuinely only installs headers and static `.a` files,
-use `cellar: :any_skip_relocation`, but verify with `otool -L` (macOS) or `ldd` (Linux).
+See [rpath-notes.md](../skills/brew-formula/rpath-notes.md) for the full explanation
+of how `brew bottle` rewrites Mach-O/ELF paths.
 
 ---
 
