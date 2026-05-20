@@ -1,0 +1,6 @@
+AllCops:
+  Exclude:
+    - 'AGENTS.md'
+    - 'README.md'
+    - 'docs/**/*'
+    - '.github/**/*'
