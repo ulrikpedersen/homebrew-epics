@@ -20,6 +20,11 @@ Use this skill before writing or updating a formula whenever:
 The output of this skill is a fully up-to-date `docs/EPICS_VERSIONS.md`. Once that
 file is correct, hand off to the **brew-formula** skill to write or update the formula.
 
+> **Tool-first rule**: whenever this skill requires fetching a remote resource (release
+> metadata, source tarballs, source files), use the best tool available to you in
+> priority order: MCP GitHub tools → `fetch_webpage` → `run_in_terminal`. Only use raw
+> `curl` commands when no suitable tool is available.
+
 ---
 
 ## Step 1 — Identify the target module and release

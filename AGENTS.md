@@ -211,3 +211,46 @@ Follow the step-by-step process in
 Verify `docs/EPICS_VERSIONS.md` is current first — if not, run the
 [update-epics-versions skill](.github/skills/update-epics-versions/SKILL.md) before
 authoring the formula.
+
+---
+
+## 7. Homebrew MCP Server — Prefer Tools Over CLI
+
+This repository has a Homebrew MCP server configured in `.vscode/mcp.json`. When
+working as an AI agent, **prefer calling MCP tools over running terminal commands**
+where a tool exists. Fall back to the CLI only when no MCP tool covers the operation.
+
+### Available MCP tools
+
+| MCP tool | Equivalent CLI | Useful for |
+|----------|---------------|------------|
+| `mcp_homebrew_style` | `brew style` | RuboCop style checks on formula files or the whole tap |
+| `mcp_homebrew_info` | `brew info` | Query version, deps, install status of any formula/cask |
+| `mcp_homebrew_install` | `brew install` | Install formulae or casks |
+| `mcp_homebrew_uninstall` | `brew uninstall` | Remove formulae or casks |
+| `mcp_homebrew_search` | `brew search` | Search for formulae/casks by name |
+| `mcp_homebrew_list` | `brew list` | List installed formulae and casks |
+| `mcp_homebrew_update` | `brew update` | Fetch latest Homebrew and formula updates |
+| `mcp_homebrew_upgrade` | `brew upgrade` | Upgrade outdated formulae/casks |
+| `mcp_homebrew_doctor` | `brew doctor` | Diagnose system/install problems |
+| `mcp_homebrew_config` | `brew config` | Show Homebrew and system configuration |
+| `mcp_homebrew_typecheck` | `brew typecheck` | Run Sorbet type-checking on Homebrew Ruby code |
+| `mcp_homebrew_tests` | `brew tests` | Run Homebrew's own internal unit/integration test suite |
+| `mcp_homebrew_help` | `brew help <cmd>` | Get usage/flag docs for any brew command |
+| `mcp_homebrew_commands` | `brew commands` | List all available brew commands |
+
+### Operations with no MCP tool — use CLI
+
+The following are **not** exposed by the MCP server and still require the terminal:
+
+| Operation | CLI command |
+|-----------|------------|
+| Formula audit (quality gate) | `brew audit --strict [--new] local/epics/<name>` |
+| Version livecheck | `brew livecheck --tap local/epics` |
+| Formula test block | `brew test local/epics/<name>` |
+| Build a bottle | `brew install --build-bottle local/epics/<name>` |
+| Bump formula version via PR | `brew bump-formula-pr` |
+
+> **Note on `mcp_homebrew_tests`**: this runs Homebrew's own internal Ruby unit
+> tests, not a formula's `test do` block. Use `brew test <formula>` in the terminal
+> to exercise a formula's test block.
