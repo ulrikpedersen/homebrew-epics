@@ -1,0 +1,80 @@
+name: Bump Dependents
+
+on:
+  workflow_dispatch:
+    inputs:
+      formula:
+        description: "Formula that was updated (e.g. epics-base)"
+        required: true
+      version:
+        description: "New version of the formula (e.g. 7.0.11)"
+        required: true
+
+jobs:
+  bump:
+    runs-on: macos-15
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump dependent formulae
+        env:
+          FORMULA: ${{ inputs.formula }}
+          VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
+        run: |
+          case "$FORMULA" in
+            epics-base) DEPENDENTS="epics-asyn epics-autosave epics-calc epics-seq epics-sscan" ;;
+            epics-asyn) DEPENDENTS="epics-busy epics-streamdevice epics-std epics-motor" ;;
+            *)          DEPENDENTS="" ;;
+          esac
+
+          if [[ -z "$DEPENDENTS" ]]; then
+            echo "No dependents found for $FORMULA — nothing to do."
+            exit 0
+          fi
+
+          # Work inside the tap directory that setup-homebrew registered
+          TAP_DIR="$(brew --repository ulrikpedersen/epics)"
+          cd "$TAP_DIR"
+
+          # Ensure we start from a clean main
+          git fetch origin main
+          git checkout main
+
+          for DEP in $DEPENDENTS; do
+            BRANCH="bump/${DEP}"
+
+            # Remove any stale local branch
+            git branch -D "$BRANCH" 2>/dev/null || true
+
+            git checkout -b "$BRANCH"
+
+            if [[ ! -f "Formula/${DEP}.rb" ]]; then
+              echo "Formula/${DEP}.rb not found — skipping $DEP"
+              git checkout main
+              continue
+            fi
+
+            brew bump-revision "Formula/${DEP}.rb"
+            git add "Formula/${DEP}.rb"
+            git commit -m "${DEP}: bump revision for ${FORMULA} ${VERSION}"
+            git push origin "$BRANCH" --force
+
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "${DEP}: bump revision for ${FORMULA} ${VERSION}" \
+              --body "Automated revision bump triggered by ${FORMULA} ${VERSION}."
+
+            git checkout main
+          done

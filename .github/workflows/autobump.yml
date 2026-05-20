@@ -1,0 +1,24 @@
+name: Autobump
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+jobs:
+  autobump:
+    runs-on: macos-15
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Bump formulae
+        uses: dawidd6/action-homebrew-bump-formula@v3
+        with:
+          token: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
+          tap: ulrikpedersen/epics
+          formula: |
+            epics-base
+          push: true
+          no-fork: true
