@@ -129,24 +129,21 @@ in Homebrew 4.x**. Do not include a `cellar` line in bottle blocks — `brew aud
 will error with `undefined method 'cellar'`. Homebrew now infers relocatability
 automatically during `brew test-bot` bottling.
 
-The bottle `root_url` must point to GHCR, and all six platform sha256 entries are
-required. Use 64-character hex placeholder strings until CI fills in the real hashes:
+The bottle `root_url` must point to GHCR. Include one `sha256` entry per supported
+platform. Use 64-character hex placeholder strings until CI fills in the real hashes:
 
 ```ruby
 bottle do
-  root_url "https://ghcr.io/v2/<org>/homebrew-epics"
-  sha256 arm64_tahoe:   "0000000000000000000000000000000000000000000000000000000000000000"
+  root_url "https://ghcr.io/v2/ulrikpedersen/homebrew-epics"
   sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
-  sha256 arm64_sonoma:  "0000000000000000000000000000000000000000000000000000000000000000"
-  sha256 sonoma:        "0000000000000000000000000000000000000000000000000000000000000000"
-  sha256 arm64_linux:   "0000000000000000000000000000000000000000000000000000000000000000"
-  sha256 x86_64_linux:  "0000000000000000000000000000000000000000000000000000000000000000"
 end
 ```
 
-Replace `<org>` with the actual GitHub organisation hosting this tap.
+Platforms are added incrementally. When adding a new platform:
+1. Add the corresponding runner to the `runs-on:` list in `.github/workflows/tests.yml`.
+2. Add a new `sha256 <platform>:` line with a 64-character hex placeholder to the formula's bottle block.
 
-> **Note on sha256 placeholders**: the strings above must be valid 64-character hex
+> **Note on sha256 placeholders**: placeholder strings must be valid 64-character hex
 > values. Text like `"placeholder_until_ci_runs"` fails audit with
 > `Invalid sha256 hash`. All-zeros or all-`a` strings are acceptable stand-ins.
 

@@ -1,7 +1,9 @@
-name: CI
+name: brew test-bot
 
 on:
   push:
+    branches:
+      - main
   pull_request:
 
 concurrency:
@@ -9,68 +11,66 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tap-syntax:
+  test-bot:
     runs-on: macos-15
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      packages: read
+      pull-requests: read
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run brew test-bot --only-tap-syntax
-        run: brew test-bot --only-tap-syntax
+      - name: Cache Homebrew Bundler RubyGems
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+          key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: ${{ runner.os }}-rubygems-
 
-  build:
-    needs: tap-syntax
-    strategy:
-      fail-fast: false
-      matrix:
-        runner: [macos-15]
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@main
+      - run: brew test-bot --only-cleanup-before
 
-      - name: Run brew test-bot --only-formulae
-        run: brew test-bot --only-formulae
+      - run: brew test-bot --only-setup
 
-      - name: Upload bottles
-        if: always()
+      - run: brew test-bot --only-tap-syntax
+
+      - name: Base64-encode GITHUB_TOKEN for HOMEBREW_DOCKER_REGISTRY_TOKEN
+        id: base64-encode
+        if: github.event_name == 'pull_request'
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          base64_token=$(echo -n "${TOKEN}" | base64 | tr -d "\n")
+          echo "::add-mask::${base64_token}"
+          echo "token=${base64_token}" >> "${GITHUB_OUTPUT}"
+
+      - run: brew test-bot --only-formulae --only-json-tab --skip-recursive-dependents --root-url="https://ghcr.io/v2/ulrikpedersen/homebrew-epics"
+        if: github.event_name == 'pull_request'
+        env:
+          HOMEBREW_DOCKER_REGISTRY_TOKEN: ${{ steps.base64-encode.outputs.token }}
+
+      - name: Check that bottles were produced
+        if: github.event_name == 'pull_request'
+        env:
+          TAP_PATH: ${{ steps.set-up-homebrew.outputs.repository-path }}
+        run: |
+          changed=$(git -C "${TAP_PATH}" diff --name-only "origin/${{ github.base_ref }}...HEAD" -- 'Formula/*.rb' | wc -l | tr -d ' ')
+          bottles=$(find . -maxdepth 1 -name '*.bottle.*' | wc -l | tr -d ' ')
+          echo "Formula files changed: $changed  Bottles produced: $bottles"
+          if [ "$changed" -gt 0 ] && [ "$bottles" -eq 0 ]; then
+            echo "ERROR: Formula files changed but no bottle files were produced!"
+            exit 1
+          fi
+
+      - name: Upload bottles as artifact
+        if: always() && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: bottles-${{ matrix.runner }}
-          path: "*.bottle.*"
-
-  publish:
-    needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: macos-15
-    concurrency:
-      group: publish-main
-      cancel-in-progress: false
-    permissions:
-      packages: write
-      contents: write
-    steps:
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@main
-
-      - name: Download bottles
-        uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
-
-      - name: Publish bottles to GHCR
-        env:
-          HOMEBREW_GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_GITHUB_PACKAGES_USER: ulrikpedersen
-        run: brew pr-upload --upload-only
-
-      - name: Commit updated sha256 hashes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Formula/
-          git diff --cached --quiet || git commit -m "ci: update bottle sha256 [skip ci]"
-          git push
+          name: bottles_macos-15
+          path: '*.bottle.*'
+          if-no-files-found: warn
