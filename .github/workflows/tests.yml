@@ -21,21 +21,68 @@ jobs:
 
   build:
     needs: tap-syntax
+    outputs:
+      has_bottle_json: ${{ steps.bottle_json.outputs.found }}
     strategy:
       fail-fast: false
       matrix:
         runner: [macos-15]
     runs-on: ${{ matrix.runner }}
     steps:
+      - name: Check out tap repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@main
 
-      - name: Run brew test-bot --only-formulae
-        run: brew test-bot --only-formulae
+      - name: Detect changed formulae
+        id: changed_formulae
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+          else
+            base_sha="${{ github.event.before }}"
+          fi
+
+          head_sha="${{ github.sha }}"
+
+          if [[ -z "${base_sha}" || "${base_sha}" == "0000000000000000000000000000000000000000" ]]; then
+            base_sha="$(git rev-parse "${head_sha}^" 2>/dev/null || true)"
+          fi
+
+          mapfile -t formulae < <(
+            git diff --name-only "${base_sha}" "${head_sha}" -- "Formula/*.rb" \
+              | sed -E 's#^Formula/(.*)\.rb$#\1#' \
+              | sort -u
+          )
+
+          if (( ${#formulae[@]} == 0 )); then
+            echo "formulae=" >> "${GITHUB_OUTPUT}"
+            echo "No changed formulae found between ${base_sha} and ${head_sha}."
+          else
+            echo "formulae=${formulae[*]}" >> "${GITHUB_OUTPUT}"
+            printf 'Changed formulae: %s\n' "${formulae[*]}"
+          fi
+
+      - name: Run brew test-bot --only-formulae --only-json-tab
+        if: steps.changed_formulae.outputs.formulae != ''
+        run: brew test-bot --only-formulae --only-json-tab ${{ steps.changed_formulae.outputs.formulae }}
+
+      - name: Check for generated bottle JSON files
+        id: bottle_json
+        if: always()
+        run: |
+          if compgen -G "*.bottle.json" > /dev/null; then
+            echo "found=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "found=false" >> "${GITHUB_OUTPUT}"
+          fi
 
       - name: Upload bottles
-        if: always()
+        if: always() && steps.bottle_json.outputs.found == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: bottles-${{ matrix.runner }}
@@ -43,7 +90,7 @@ jobs:
 
   publish:
     needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.build.outputs.has_bottle_json == 'true'
     runs-on: macos-15
     concurrency:
       group: publish-main
