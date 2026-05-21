@@ -94,6 +94,7 @@ class EpicsAsyn < Formula
   bottle do
     # ...
   end
+end
 ```
 
 ### Cascading revision bumps
