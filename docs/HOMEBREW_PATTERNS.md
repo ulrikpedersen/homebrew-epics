@@ -25,21 +25,23 @@ directive before invoking `make`.
 ### Basic structure
 
 ```ruby
-def install
-  # Write configure/RELEASE.local with Homebrew-specific dependency paths.
-  # This leaves configure/RELEASE untouched.
-  (buildpath/"configure/RELEASE.local").write <<~EOS
-    EPICS_BASE=#{Formula["epics-base"].opt_prefix}
-    ASYN=#{Formula["epics-asyn"].opt_prefix}
-  EOS
+class EpicsExample < Formula
+  def install
+    # Write configure/RELEASE.local with Homebrew-specific dependency paths.
+    # This leaves configure/RELEASE untouched.
+    (buildpath/"configure/RELEASE.local").write <<~EOS
+      EPICS_BASE=#{Formula["epics-base"].opt_prefix}
+      ASYN=#{Formula["epics-asyn"].opt_prefix}
+    EOS
 
-  # Append the include directive if the module's configure/RELEASE lacks it.
-  release = buildpath/"configure/RELEASE"
-  unless release.read.include?("RELEASE.local")
-    release.open("a") { |f| f.puts "\n-include $(TOP)/configure/RELEASE.local" }
+    # Append the include directive if the module's configure/RELEASE lacks it.
+    release = buildpath/"configure/RELEASE"
+    unless release.read.include?("RELEASE.local")
+      release.open("a") { |f| f.puts "\n-include $(TOP)/configure/RELEASE.local" }
+    end
+
+    system "make", "INSTALL_LOCATION=#{prefix}"
   end
-
-  system "make", "INSTALL_LOCATION=#{prefix}"
 end
 ```
 
@@ -84,15 +86,15 @@ stays the same but the binary must be rebuilt, increment `revision`.
 
 ```ruby
 class EpicsAsyn < Formula
-  desc "..."
-  homepage "..."
-  url "..."
-  sha256 "..."
-  version "4.44.2"
-  revision 2      # ← increment this; remove when version bumps
+  desc "EPICS asyn support module"
+  homepage "https://github.com/epics-modules/asyn"
+  url "https://github.com/epics-modules/asyn/archive/R4-44-2.tar.gz"
+  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  revision 2 # ← increment this; remove when version bumps
 
   bottle do
-    # ...
+    root_url "https://ghcr.io/v2/ulrikpedersen/homebrew-epics"
+    sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
   end
 end
 ```
@@ -151,9 +153,9 @@ workflow) how to detect new upstream versions.
 
 ```ruby
 livecheck do
-  url :stable           # use the stable URL's GitHub repo
-  strategy :github_latest  # check the "Latest" release tag on GitHub
-  regex(/^R(\d+(?:-\d+)+)$/i)  # capture the numeric part of the tag
+  url :stable # use the stable URL's GitHub repo
+  strategy :github_latest # check the "Latest" release tag on GitHub
+  regex(/^R(\d+(?:-\d+)+)$/i) # capture the numeric part of the tag
 end
 ```
 
