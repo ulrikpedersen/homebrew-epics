@@ -10,6 +10,8 @@ class EpicsBase < Formula
   url "https://github.com/epics-base/epics-base/releases/download/R7.0.10/base-7.0.10.tar.gz"
   sha256 "44193e962793de514ead442e9b5096a13109f1ee275f131995826468aa89b839"
 
+  revision 1
+
   livecheck do
     url :stable
     strategy :github_latest
@@ -17,8 +19,8 @@ class EpicsBase < Formula
   end
 
   bottle do
-    root_url "https://ghcr.io/v2/ulrikpedersen/homebrew-epics"
-    sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
+    root_url "https://ghcr.io/v2/ulrikpedersen/epics"
+    sha256 arm64_sequoia: "e680ca5f6f26adbc2d33ef8f9c9604feb450078186e940156a361d7abd53f151"
   end
 
   keg_only :versioned_formula

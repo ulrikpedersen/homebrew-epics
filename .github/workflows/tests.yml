@@ -49,10 +49,54 @@ jobs:
           echo "::add-mask::${base64_token}"
           echo "token=${base64_token}" >> "${GITHUB_OUTPUT}"
 
-      - run: brew test-bot --only-formulae --only-json-tab --skip-recursive-dependents --root-url="https://ghcr.io/v2/ulrikpedersen/homebrew-epics"
+      - name: Build, bottle, and verify changed formulae
         if: github.event_name == 'pull_request'
         env:
           HOMEBREW_DOCKER_REGISTRY_TOKEN: ${{ steps.base64-encode.outputs.token }}
+          TAP_PATH: ${{ steps.set-up-homebrew.outputs.repository-path }}
+        run: |
+          # Derive tap name from repo name (ulrikpedersen/homebrew-epics → ulrikpedersen/epics)
+          OWNER="${GITHUB_REPOSITORY%%/*}"
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+          TAP_NAME="${OWNER}/${REPO_NAME#homebrew-}"
+          ROOT_URL="https://ghcr.io/v2/ulrikpedersen/epics"
+
+          changed_files=$(git -C "${TAP_PATH}" diff --name-only "origin/${{ github.base_ref }}...HEAD" -- 'Formula/*.rb')
+          if [ -z "${changed_files}" ]; then
+            echo "No formula files changed, skipping build."
+            exit 0
+          fi
+
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            formula=$(basename "${f}" .rb)
+            full_name="${TAP_NAME}/${formula}"
+            echo "::group::${full_name}"
+
+            # Install dependencies from pre-built bottles
+            brew install --only-dependencies --formula "${full_name}"
+
+            # Build from source in bottle mode
+            brew install --build-bottle --verbose --formula "${full_name}"
+
+            # Audit: --except=installed skips cellar checks (flat namespace, non-executables in bin/).
+            # EPICS intentionally installs into bin/<arch>/ and lib/<arch>/ — this is by design.
+            brew audit --formula --except=installed --git --skip-style "${full_name}"
+
+            # Run formula test block
+            brew test --verbose "${full_name}"
+
+            # Linkage check
+            brew linkage --test "${full_name}"
+
+            # Package bottle and write JSON metadata
+            brew bottle --json --verbose --root-url="${ROOT_URL}" "${full_name}"
+
+            # Merge bottle sha256 back into the formula file
+            brew bottle --merge --write --no-commit --no-all-checks "${formula}"*.bottle.json
+
+            echo "::endgroup::"
+          done <<< "${changed_files}"
 
       - name: Check that bottles were produced
         if: github.event_name == 'pull_request'
@@ -69,7 +113,7 @@ jobs:
 
       - name: Upload bottles as artifact
         if: always() && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: bottles_macos-15
           path: '*.bottle.*'
