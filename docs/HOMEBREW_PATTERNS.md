@@ -99,7 +99,7 @@ class EpicsAsyn < Formula
   revision 2 # ← increment this; remove when version bumps
 
   bottle do
-    root_url "https://ghcr.io/v2/ulrikpedersen/homebrew-epics"
+    root_url "https://ghcr.io/v2/ulrikpedersen/epics"
     sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
   end
 end
@@ -198,8 +198,10 @@ are disabled** in modern Homebrew — you must register a local tap first:
 brew tap local/epics /path/to/homebrew-epics
 
 # Then audit by name
-brew audit --strict local/epics/epics-<name>
-brew audit --strict --new local/epics/epics-<name>   # for new formulae
+# --except=installed is required: EPICS installs into bin/<arch>/ and lib/<arch>/
+# which fail the standard cellar checks (check_non_executables, check_flat_namespace).
+brew audit --strict --except=installed local/epics/epics-<name>
+brew audit --strict --except=installed --new local/epics/epics-<name>   # for new formulae
 ```
 
 Common audit failures in EPICS formulae and how to fix them:

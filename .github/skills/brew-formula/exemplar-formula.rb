@@ -60,7 +60,7 @@ class EpicsAsyn < Formula
   #       text like "placeholder_until_ci_runs" fails audit.
   # ---------------------------------------------------------------------------
   bottle do
-    root_url "https://ghcr.io/v2/<org>/homebrew-epics"
+    root_url "https://ghcr.io/v2/<org>/epics"
     sha256 arm64_tahoe:   "0000000000000000000000000000000000000000000000000000000000000000"
     sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
     sha256 arm64_sonoma:  "0000000000000000000000000000000000000000000000000000000000000000"

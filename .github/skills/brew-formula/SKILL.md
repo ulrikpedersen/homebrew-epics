@@ -91,7 +91,7 @@ relocatability automatically during `brew test-bot` bottling.
 
 ```ruby
 bottle do
-  root_url "https://ghcr.io/v2/<org>/homebrew-epics"
+  root_url "https://ghcr.io/v2/<org>/epics"
   sha256 arm64_tahoe:   "0000000000000000000000000000000000000000000000000000000000000000"
   sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
   sha256 arm64_sonoma:  "0000000000000000000000000000000000000000000000000000000000000000"
@@ -101,7 +101,10 @@ bottle do
 end
 ```
 
-Real SHA256 hashes are filled in by `brew test-bot` during CI. Use 64-character
+> **GHCR namespace**: Use `<org>/epics`, not `<org>/homebrew-epics`. Homebrew strips
+> the `homebrew-` prefix from the tap name when deriving the GHCR package path.
+
+Real SHA256 hashes are filled in by the custom CI build loop during CI. Use 64-character
 hex placeholder strings (e.g. all-zeros) — text like `"placeholder_until_ci_runs"`
 fails audit with `Invalid sha256 hash`.
 
@@ -198,9 +201,11 @@ This runs RuboCop and is faster than the full audit.
 **Step 9b — Full audit via CLI** (required — no MCP equivalent):
 
 ```sh
-brew audit --strict local/epics/epics-<name>
+# --except=installed is required for all EPICS formulae: EPICS installs into
+# bin/<arch>/ and lib/<arch>/ which fail the standard cellar post-install checks.
+brew audit --strict --except=installed local/epics/epics-<name>
 # For new formulae:
-brew audit --strict --new local/epics/epics-<name>
+brew audit --strict --except=installed --new local/epics/epics-<name>
 ```
 
 Fix every warning and error before declaring the formula ready. The most common

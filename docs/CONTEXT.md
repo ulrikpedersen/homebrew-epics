@@ -53,8 +53,12 @@ authenticate to download bottles. Homebrew's bottle mechanism fetches from the
 
 Bottle images are stored at:
 ```
-ghcr.io/<org>/homebrew-epics/<formula-name>:<version>
+ghcr.io/<org>/epics/<formula-name>:<version>
 ```
+
+Note: Homebrew strips the `homebrew-` prefix from the tap name when deriving the GHCR
+package namespace. For tap `ulrikpedersen/homebrew-epics` the namespace is
+`ghcr.io/ulrikpedersen/epics`, not `ghcr.io/ulrikpedersen/homebrew-epics`.
 
 For module dependency information, see [EPICS_VERSIONS.md](EPICS_VERSIONS.md).
 

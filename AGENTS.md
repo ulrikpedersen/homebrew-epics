@@ -17,12 +17,18 @@ use the skill at [.github/skills/brew-formula/SKILL.md](.github/skills/brew-form
 Run this before finishing any formula work:
 
 ```sh
-brew audit --strict --new Formula/<name>.rb   # for new formulae
-brew audit --strict Formula/<name>.rb          # for updates
+brew audit --strict --except=installed --new local/epics/<name>   # for new formulae
+brew audit --strict --except=installed local/epics/<name>          # for updates
 ```
 
-Fix **every** warning and every error. A formula with outstanding audit issues is not
-complete. If an audit rule genuinely does not apply, add a comment explaining why.
+The `--except=installed` flag is **required** for all EPICS formulae. EPICS
+intentionally installs binaries under `bin/<arch>/` and libraries under `lib/<arch>/`
+(e.g. `lib/darwin-aarch64/`). The standard cellar post-install checks
+(`check_non_executables(bin)` and `check_flat_namespace`) fail on this layout by
+design — skipping them with `--except=installed` is correct.
+
+Fix **every** remaining warning and error. A formula with outstanding audit issues is
+not complete. If an audit rule genuinely does not apply, add a comment explaining why.
 
 ### 1.2 Every formula must have a `livecheck` block
 
@@ -134,10 +140,14 @@ platform. Use 64-character hex placeholder strings until CI fills in the real ha
 
 ```ruby
 bottle do
-  root_url "https://ghcr.io/v2/ulrikpedersen/homebrew-epics"
+  root_url "https://ghcr.io/v2/ulrikpedersen/epics"
   sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
 end
 ```
+
+> **GHCR namespace**: Homebrew strips the `homebrew-` prefix when deriving the GHCR
+> package path. For tap `ulrikpedersen/homebrew-epics` the correct namespace is
+> `ghcr.io/v2/ulrikpedersen/epics` (not `homebrew-epics`).
 
 Platforms are added incrementally. When adding a new platform:
 1. Add the corresponding runner to the `runs-on:` list in `.github/workflows/tests.yml`.
