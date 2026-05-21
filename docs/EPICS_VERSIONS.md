@@ -16,9 +16,9 @@ Update this file whenever a formula version is bumped.
 | `epics-asyn` | 4.44.2 (`R4-44-2`) | https://github.com/epics-modules/asyn |
 | `epics-autosave` | 6.0 (`R6-0`) | https://github.com/epics-modules/autosave |
 | `epics-busy` | 1.7.4 (`R1-7-4`) | https://github.com/epics-modules/busy |
-| `epics-calc` | 3.7.4 (`R3-7-4`) | https://github.com/epics-modules/calc |
-| `epics-seq` | 2.2.9 (`R2-2-9`) | https://github.com/epics-modules/seq |
-| `epics-sscan` | 2.11.5 (`R2-11-5`) | https://github.com/epics-modules/sscan |
+| `epics-calc` | 3.7.5 (`R3-7-5`) | https://github.com/epics-modules/calc |
+| `epics-seq` | 2.2.1 (`seq-2-2-1`) | https://github.com/epics-modules/sequencer |
+| `epics-sscan` | 2.12 (`R2-12`) | https://github.com/epics-modules/sscan |
 | `epics-std` | 3.6.2 (`R3-6-2`) | https://github.com/epics-modules/std |
 | `epics-streamdevice` | 2.8.24 (`2.8.24`) | https://github.com/paulscherrerinstitute/StreamDevice |
 | `epics-motor` | 7.3.1 (`R7-3-1`) | https://github.com/epics-modules/motor |
@@ -36,11 +36,11 @@ epics-base 7.0.10 (R7.0.10)
 │
 ├── epics-autosave 6.0 (R6-0)                  [only: epics-base]
 │
-├── epics-calc 3.7.4 (R3-7-4)                  [also: epics-sscan (weak runtime dep)]
+├── epics-calc 3.7.5 (R3-7-5)                  [only: epics-base]
 │
-├── epics-seq 2.2.9 (R2-2-9)                   [only: epics-base]
+├── epics-seq 2.2.1 (seq-2-2-1)                [only: epics-base]
 │
-├── epics-sscan 2.11.5 (R2-11-5)               [also: epics-calc (for EPICS_CALC support)]
+├── epics-sscan 2.12 (R2-12)                   [also: epics-seq]
 │
 ├── epics-std 3.6.2 (R3-6-2)                   [also: epics-asyn, epics-calc, epics-sscan]
 │
@@ -50,9 +50,8 @@ epics-base 7.0.10 (R7.0.10)
 ### Notes on graph interpretation
 
 - All edges shown are build-time AND run-time dependencies unless noted.
-- `epics-calc` and `epics-sscan` have a mild circular dependency in their IOC-shell
-  support scripts; the Homebrew formulae break this by treating it as a runtime-only
-  suggestion, not a hard build dependency.
+- `epics-calc` can optionally use `sscan`/`sncseq` helpers; in Homebrew it is built
+  standalone by setting `SSCAN=` empty in `configure/RELEASE.local`.
 
 ---
 
@@ -144,9 +143,7 @@ epics-base 7.0.10 (R7.0.10)
 - **Livecheck regex**: `/^R(\d+(?:-\d+)+)$/i`
 - **Dependencies (build)**: `epics-base`
 - **Dependencies (runtime)**: `epics-base`
-- **Notes**: Although `calc` and `sscan` have a soft inter-dependency for their IOC
-  shell support, the Homebrew formula treats `calc` as independent of `sscan` at
-  build time. Set `SSCAN=` empty in `configure/RELEASE` to suppress the sscan dependency.
+- **Notes**: Build standalone by setting `SSCAN=` empty in `configure/RELEASE.local`.
 - **Installs**: shared lib (libcalc), headers, `.dbd` files
 
 ---
@@ -154,11 +151,11 @@ epics-base 7.0.10 (R7.0.10)
 ### `epics-seq`
 
 - **Formula class**: `EpicsSeq`
-- **GitHub**: https://github.com/epics-modules/seq
+- **GitHub**: https://github.com/epics-modules/sequencer
 - **Homepage**: https://epics-modules.github.io/sequencer/
 - **Description**: EPICS State Notation Language (SNL) sequencer
-- **Tag format**: `R<major>-<minor>-<patch>` (e.g. `R2-2-9`)
-- **Livecheck regex**: `/^R(\d+(?:-\d+)+)$/i`
+- **Tag format**: `seq-<major>-<minor>-<patch>` (e.g. `seq-2-2-1`)
+- **Livecheck regex**: `/^seq-(\d+(?:-\d+)+)$/i`
 - **Dependencies (build)**: `epics-base`
 - **Dependencies (runtime)**: `epics-base`
 - **Installs**: `snc` compiler binary, shared libs (libseq, libpv), headers
@@ -174,13 +171,13 @@ epics-base 7.0.10 (R7.0.10)
 - **GitHub**: https://github.com/epics-modules/sscan
 - **Homepage**: https://epics-modules.github.io/sscan/
 - **Description**: EPICS sscan record and associated software
-- **Tag format**: `R<major>-<minor>-<patch>`
+- **Tag format**: `R<major>-<minor>` (e.g. `R2-12`)
 - **Livecheck regex**: `/^R(\d+(?:-\d+)+)$/i`
-- **Dependencies (build)**: `epics-base`, `epics-calc`
-- **Dependencies (runtime)**: `epics-base`, `epics-calc`
+- **Dependencies (build)**: `epics-base`, `epics-seq`
+- **Dependencies (runtime)**: `epics-base`, `epics-seq`
 - **Installs**: shared lib (libsscan), headers, `.dbd` files
 - **Build quirks**:
-  - Set `CALC` in `configure/RELEASE` to `epics-calc`'s `opt_prefix`
+  - Set `SNCSEQ` in `configure/RELEASE.local` to `epics-seq`'s `opt_prefix`
 
 ---
 
@@ -231,5 +228,4 @@ epics-base 7.0.10 (R7.0.10)
   - Patch `configure/RELEASE` for all five dependencies
   - Motor's `configure/RELEASE` uses `MOTOR` as a self-referential variable; do not
     accidentally overwrite it
-
 
