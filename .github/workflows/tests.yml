@@ -94,7 +94,7 @@ jobs:
             brew bottle --json --verbose --root-url="${ROOT_URL}" "${full_name}"
 
             # Merge bottle sha256 back into the formula file
-            brew bottle --merge --write --no-commit --no-all-checks ${formula}*.bottle.json
+            brew bottle --merge --write --no-commit --no-all-checks "${formula}"*.bottle.json
 
             echo "::endgroup::"
           done <<< "${changed_files}"
