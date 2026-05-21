@@ -2,5 +2,7 @@ AllCops:
   Exclude:
     - 'AGENTS.md'
     - 'README.md'
-    - 'docs/**/*'
+    - 'docs/CONTEXT.md'
+    - 'docs/EPICS_VERSIONS.md'
+    - 'docs/HOMEBREW_PATTERNS.md'
     - '.github/**/*'

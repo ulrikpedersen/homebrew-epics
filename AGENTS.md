@@ -77,8 +77,8 @@ end
 # WRONG — bakes /opt/homebrew/Cellar/epics-base/7.0.10 into installed files
 # (and mutates the original configure/RELEASE unnecessarily)
 inreplace "configure/RELEASE",
-  /^EPICS_BASE\s*=.*/,
-  "EPICS_BASE=#{Formula["epics-base"].prefix}"
+          /^EPICS_BASE\s*=.*/,
+          "EPICS_BASE=#{Formula["epics-base"].prefix}"
 ```
 
 See [.github/skills/brew-formula/configure-release.md](.github/skills/brew-formula/configure-release.md)
