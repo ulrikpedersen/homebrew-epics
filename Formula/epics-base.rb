@@ -16,6 +16,8 @@ class EpicsBase < Formula
     regex(/^R(\d+(?:\.\d+)+)$/i)
   end
 
+  revision 1
+
   bottle do
     root_url "https://ghcr.io/v2/ulrikpedersen/homebrew-epics"
     sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
