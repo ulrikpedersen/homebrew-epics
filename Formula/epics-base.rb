@@ -10,7 +10,7 @@ class EpicsBase < Formula
   url "https://github.com/epics-base/epics-base/releases/download/R7.0.10/base-7.0.10.tar.gz"
   sha256 "44193e962793de514ead442e9b5096a13109f1ee275f131995826468aa89b839"
 
-  revision 1
+  revision 2
 
   livecheck do
     url :stable
