@@ -14,7 +14,7 @@ Update this file whenever a formula version is bumped.
 |---------|---------|---------------------|
 | `epics-base` | 7.0.10 (`R7.0.10`) | https://github.com/epics-base/epics-base |
 | `epics-asyn` | 4.44.2 (`R4-44-2`) | https://github.com/epics-modules/asyn |
-| `epics-autosave` | 5.11 (`R5-11`) | https://github.com/epics-modules/autosave |
+| `epics-autosave` | 6.0 (`R6-0`) | https://github.com/epics-modules/autosave |
 | `epics-busy` | 1.7.4 (`R1-7-4`) | https://github.com/epics-modules/busy |
 | `epics-calc` | 3.7.4 (`R3-7-4`) | https://github.com/epics-modules/calc |
 | `epics-seq` | 2.2.9 (`R2-2-9`) | https://github.com/epics-modules/seq |
@@ -34,7 +34,7 @@ epics-base 7.0.10 (R7.0.10)
 │   ├── epics-busy 1.7.4 (R1-7-4)              [also: epics-base]
 │   └── epics-streamdevice 2.8.24 (2.8.24)     [also: epics-base]
 │
-├── epics-autosave 5.11 (R5-11)                [only: epics-base]
+├── epics-autosave 6.0 (R6-0)                  [only: epics-base]
 │
 ├── epics-calc 3.7.4 (R3-7-4)                  [also: epics-sscan (weak runtime dep)]
 │
@@ -104,13 +104,16 @@ epics-base 7.0.10 (R7.0.10)
 - **GitHub**: https://github.com/epics-modules/autosave
 - **Homepage**: https://epics-modules.github.io/autosave/
 - **Description**: EPICS support module for automatically saving and restoring PV values
-- **Tag format**: `R<major>-<minor>` (two components only, e.g. `R5-11`)
+- **Tag format**: `R<major>-<minor>` (two components only, e.g. `R6-0`)
+- **Archive URL**: `https://github.com/epics-modules/autosave/archive/refs/tags/R6-0.tar.gz`
 - **Livecheck regex**: `/^R(\d+(?:-\d+)+)$/i`
 - **Dependencies (build)**: `epics-base`
 - **Dependencies (runtime)**: `epics-base`
 - **Installs**: shared lib (libautosave), headers, `.dbd` files
-- **Build quirks**: None unusual. The two-component version `5.11` is correct; do not
-  invent a `.0` patch component.
+- **Build quirks**: The two-component version `6.0` is correct; do not invent a `.0`
+  patch component. The R6-0 release includes breaking changes to `set_savefile_path`
+  NFS handling — the third argument (mountpoint) must be specified before calling
+  `save_restoreSet_NFSHost` if NFS is used.
 
 ---
 
