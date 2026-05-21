@@ -26,6 +26,11 @@ directive before invoking `make`.
 
 ```ruby
 class EpicsExample < Formula
+  desc "EPICS example support module"
+  homepage "https://github.com/epics-modules"
+  url "https://github.com/epics-modules/example/archive/refs/tags/R1-0-0.tar.gz"
+  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+
   def install
     # Write configure/RELEASE.local with Homebrew-specific dependency paths.
     # This leaves configure/RELEASE untouched.
@@ -85,10 +90,11 @@ stays the same but the binary must be rebuilt, increment `revision`.
 ### Syntax
 
 ```ruby
+# rubocop:disable Style/OneClassPerFile
 class EpicsAsyn < Formula
   desc "EPICS asyn support module"
   homepage "https://github.com/epics-modules/asyn"
-  url "https://github.com/epics-modules/asyn/archive/R4-44-2.tar.gz"
+  url "https://github.com/epics-modules/asyn/archive/refs/tags/R4-44-2.tar.gz"
   sha256 "0000000000000000000000000000000000000000000000000000000000000000"
   revision 2 # ← increment this; remove when version bumps
 
@@ -97,6 +103,7 @@ class EpicsAsyn < Formula
     sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
   end
 end
+# rubocop:enable Style/OneClassPerFile
 ```
 
 ### Cascading revision bumps
