@@ -1,4 +1,4 @@
-name: Tests
+name: CI
 
 on:
   push:
@@ -65,7 +65,7 @@ jobs:
         env:
           HOMEBREW_GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_GITHUB_PACKAGES_USER: ulrikpedersen
-        run: brew test-bot --only-formulae-upload
+        run: brew pr-upload --upload-only
 
       - name: Commit updated sha256 hashes
         run: |
