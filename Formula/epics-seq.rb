@@ -19,8 +19,8 @@ class EpicsSeq < Formula
 
   keg_only :versioned_formula
 
-  depends_on "epics-base"
   depends_on "re2c" => :build
+  depends_on "epics-base"
 
   def install
     (buildpath/"configure/RELEASE.local").write <<~EOS

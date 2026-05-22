@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 class EpicsSscan < Formula
-  desc "EPICS sscan record and associated software"
+  desc "Scan record and associated software for EPICS"
   homepage "https://epics-modules.github.io/sscan/"
   url "https://github.com/epics-modules/sscan/archive/refs/tags/R2-12.tar.gz"
   sha256 "c6b72b2854f15292f9094375aa9898b711e8d96484dcf2502de854638efe058d"
