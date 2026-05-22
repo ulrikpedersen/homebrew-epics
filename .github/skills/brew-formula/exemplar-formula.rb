@@ -15,6 +15,8 @@ class EpicsAsyn < Formula
   # ---------------------------------------------------------------------------
   # Package metadata
   # Rule: desc must be a single sentence, no trailing period, ≤ 80 characters.
+  # Rule: Write natural user-facing phrasing (good: "EPICS module for ..."),
+  #       avoid awkward module-name phrasing.
   # Rule: homepage must be HTTPS and point to the module's documentation page.
   # ---------------------------------------------------------------------------
   desc "EPICS module for interfacing to synchronous and asynchronous devices"
@@ -101,7 +103,12 @@ class EpicsAsyn < Formula
   # Rule: Native build tools (cmake, perl for EPICS, etc.) that are only needed
   #       during compilation get => :build.
   # Rule: Never add depends_on "gcc" — use Apple Clang on macOS.
+  # Rule: Keep dependency ordering consistent to avoid style churn.
+  #       Preferred order in this tap: build tools first, then runtime EPICS deps.
   # ---------------------------------------------------------------------------
+  # Example ordering:
+  #   depends_on "re2c" => :build
+  #   depends_on "epics-base"
   depends_on "epics-base"  # required at build time (headers, build system) and runtime (shared libs)
 
   # ---------------------------------------------------------------------------

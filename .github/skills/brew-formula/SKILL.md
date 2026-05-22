@@ -124,10 +124,10 @@ typically installed at a time.
 ### Step 6 — Add dependencies
 
 ```ruby
-depends_on "epics-base"               # runtime dependency (default)
-depends_on "epics-asyn"               # runtime dependency
 depends_on "re2c" => :build           # build-only tool (not needed at runtime)
 depends_on "cmake" => :build          # build-only tool
+depends_on "epics-base"               # runtime dependency (default)
+depends_on "epics-asyn"               # runtime dependency
 ```
 
 Rules:
@@ -135,6 +135,19 @@ Rules:
   build-time and run-time. Do **not** mark them `:build`.
 - Tools like `cmake`, `re2c`, `python` used only during `install do` get `=> :build`.
 - Do not add `depends_on "gcc"` — Apple Clang is the compiler on macOS.
+
+Dependency ordering guardrail (to avoid follow-up style fixes):
+
+```ruby
+# ✅ preferred
+depends_on "re2c" => :build
+depends_on "epics-base"
+depends_on "epics-asyn"
+
+# ❌ avoid mixing order
+depends_on "epics-base"
+depends_on "re2c" => :build
+```
 
 ### Step 7 — Write the `install` method
 
@@ -194,6 +207,13 @@ Replace `"lib<name>"` with the library the module builds (e.g. `"libasyn"`, `"li
 
 ### Step 9 — Check style and run `brew audit --strict`
 
+Before opening a PR, the following must pass for every changed formula:
+
+```sh
+brew style Formula/epics-<name>.rb
+brew audit --strict --except=installed local/epics/epics-<name>
+```
+
 **Step 9a — Style check via MCP tool** (preferred): call `mcp_homebrew_style` with
 `formula: "local/epics/epics-<name>"` (and optionally `fix: true` to auto-correct).
 This runs RuboCop and is faster than the full audit.
@@ -247,6 +267,7 @@ Before finishing a formula, confirm every item is present:
 - [ ] `configure/RELEASE.local` written with all dependency paths (`opt_prefix`)
 - [ ] `system "make", "INSTALL_LOCATION=#{prefix}"` in `install do`
 - [ ] `test do` that asserts the expected shared library is present in `lib/<arch>/`
+- [ ] `brew style Formula/epics-<name>.rb` passes
 - [ ] `brew audit --strict` passes with no warnings or errors
 
 ---

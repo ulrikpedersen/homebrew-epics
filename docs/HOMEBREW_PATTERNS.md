@@ -225,8 +225,22 @@ regex will result in false positives or missed updates.
 
 ## 5. `brew audit --strict` checklist
 
-Before declaring any formula done, run `brew audit`. **Path arguments to `brew audit`
+Before declaring any formula done, run a quick style preflight and then `brew audit`.
+**Path arguments to `brew audit`
 are disabled** in modern Homebrew — you must register a local tap first:
+
+### Style preflight (run before opening a PR)
+
+```sh
+brew style Formula/epics-<name>.rb
+```
+
+Common style pitfalls seen in PR #10:
+
+| Style issue | Preferred pattern |
+|-------------|-------------------|
+| `depends_on` ordering (build tool mixed after runtime deps) | Group build tools first, then runtime module deps (or keep a single consistent ordering across the file) |
+| Awkward `desc` wording copied from module names | Use natural sentence phrasing that reads clearly to users |
 
 ```sh
 # One-time setup: register the local repo as a tap

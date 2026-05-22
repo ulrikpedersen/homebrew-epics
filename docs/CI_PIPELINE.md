@@ -62,6 +62,10 @@ this job only orchestrates — it does not build.
 4. Commits the formula update with a message like `epics-base: update 7.0.10_2 bottle.`
 5. Calls `brew pr-upload` to push the `.bottle.tar.gz` files to GHCR
 
+> **History requirement:** keep formula PR branches linear. Do **not** merge another
+> PR branch into a formula PR branch. `brew pr-pull` relies on `git cherry-pick`;
+> merge commits can fail the publish job. Rebase or squash instead.
+
 After `brew pr-pull` finishes, `git-try-push` pushes all accumulated commits (the
 original PR commits + the bottle update commit) to `main`. Then the PR branch is
 deleted, which causes GitHub to close the PR.
