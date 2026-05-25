@@ -21,19 +21,28 @@ class EpicsAsyn < Formula
   homepage "https://epics-modules.github.io/asyn/"
 
   # ---------------------------------------------------------------------------
-  # Source URL and integrity
+  # Source URL, version override, and integrity
   # Rule: Always use the GitHub archive URL derived from the exact release tag.
   #       The tag format for most EPICS modules is R<major>-<minor>-<patch>.
+  # Rule: When the tag uses dash-separated numbers, add an explicit `version`
+  #       IMMEDIATELY AFTER `url` and BEFORE `sha256`. This is the only accepted
+  #       position: `brew bump-formula-pr` substitutes url + version as a pair.
+  #       Omit when the URL already contains a dot-separated version string.
   # Rule: sha256 must be the checksum of the tarball at this exact URL.
   #       Compute with: curl -sL <url> | sha256sum
   # ---------------------------------------------------------------------------
   url "https://github.com/epics-modules/asyn/archive/refs/tags/R4-44-2.tar.gz"
-  sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"  # replace with real hash
-  # version is only needed when Homebrew cannot parse it from the URL.
-  # For most GitHub archive URLs the version is embedded in the filename and
-  # can be inferred automatically. Including a redundant version line causes
-  # `brew audit --strict` to warn: omit it unless inference fails.
+  # version must appear BETWEEN url and sha256 when the source tag uses
+  # dash-separated version numbers (R4-44-2, R3-7-5, seq-2-2-1, etc.).
+  # Homebrew auto-detection stops at the first ambiguous dash and produces a
+  # truncated result (e.g. "4" from "R4-44-2"), causing livecheck false positives.
+  # Place version immediately after url so `brew bump-formula-pr` can substitute
+  # both fields in one atomic edit.
+  # Omit this line only when the URL already contains a dot-separated version
+  # (e.g. base-7.0.10.tar.gz); including it then triggers `brew audit --strict`
+  # warning: "version X.Y.Z is redundant with version scanned from URL".
   version "4.44.2"
+  sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"  # replace with real hash
 
   # ---------------------------------------------------------------------------
   # Livecheck — tells `brew livecheck` and autobump how to find new versions.
