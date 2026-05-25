@@ -14,11 +14,10 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@main
 
       - name: Bump formulae
-        uses: dawidd6/action-homebrew-bump-formula@v3
+        uses: dawidd6/action-homebrew-bump-formula@v7
         with:
           token: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
           tap: ulrikpedersen/epics
-          formula: |
-            epics-base
           push: true
           no-fork: true
+          livecheck: true
