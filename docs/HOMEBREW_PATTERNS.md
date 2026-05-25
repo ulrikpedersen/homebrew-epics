@@ -186,12 +186,12 @@ comparison `3.7.5 > 3.7` is true — a false positive — and `bump-formula-pr`
 constructs a broken URL by performing a string substitution on the partial version.
 
 **Rule:** For any formula whose source URL tag uses dashes as version separators,
-always declare an explicit `version` in dot notation immediately after `sha256`:
+always declare an explicit `version` in dot notation immediately before `sha256`:
 
 ```ruby
 url "https://github.com/epics-modules/calc/archive/refs/tags/R3-7-5.tar.gz"
+version "3.7.5" # required: prevents livecheck false positives from dash-style tags
 sha256 "..."
-version "3.7.5"   # required: prevents livecheck false positives from dash-style tags
 ```
 
 This applies to tags like `R6-0` → `version "6.0"`, `R3-7-5` → `version "3.7.5"`,

@@ -5,8 +5,8 @@ class EpicsAutosave < Formula
   desc "EPICS support module for automatically saving and restoring PV values"
   homepage "https://epics-modules.github.io/autosave/"
   url "https://github.com/epics-modules/autosave/archive/refs/tags/R6-0.tar.gz"
-  sha256 "73b00123790e813b413dd87f573f9806be1fd36a66c0014cee85a75b6f62cc7c"
   version "6.0"
+  sha256 "73b00123790e813b413dd87f573f9806be1fd36a66c0014cee85a75b6f62cc7c"
 
   livecheck do
     url :stable
