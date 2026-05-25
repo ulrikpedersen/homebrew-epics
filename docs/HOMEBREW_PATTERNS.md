@@ -182,8 +182,10 @@ stops parsing at the first ambiguous dash.
 The livecheck regex capture group correctly extracts the full numeric portion
 (`3-7-5`). Homebrew then normalises dashes to dots during version comparison, so
 `3-7-5 == 3.7.5`. However, if the auto-detected formula version is only `3.7`, the
-comparison `3.7.5 > 3.7` is true — a false positive — and `bump-formula-pr`
-constructs a broken URL by performing a string substitution on the partial version.
+comparison `3.7.5 > 3.7` is true — but this is a **false positive**: the formula
+already packages `3.7.5` (that is what the URL downloads), so there is no real
+update to apply. `bump-formula-pr` then constructs a broken URL by performing a
+string substitution of `3.7.5` into a URL that only contains the partial string `3.7`.
 
 **Rule:** For any formula whose source URL tag uses dashes as version separators,
 always declare an explicit `version` in dot notation **between `url` and `sha256`**
