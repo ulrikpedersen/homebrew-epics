@@ -22,13 +22,20 @@ class EpicsAsyn < Formula
   keg_only :versioned_formula
 
   depends_on "epics-base"
+  depends_on "epics-calc"
+  depends_on "epics-seq"
+  depends_on "epics-sscan"
   depends_on "libftdi"
   depends_on "libtirpc"
   depends_on "libusb"
+  depends_on "libusb-compat"
 
   def install
     (buildpath/"configure/RELEASE.local").write <<~EOS
       EPICS_BASE=#{Formula["epics-base"].opt_prefix}
+      SNCSEQ=#{Formula["epics-seq"].opt_prefix}
+      CALC=#{Formula["epics-calc"].opt_prefix}
+      SSCAN=#{Formula["epics-sscan"].opt_prefix}
     EOS
 
     (buildpath/"configure/CONFIG_SITE.local").write <<~EOS
@@ -36,7 +43,7 @@ class EpicsAsyn < Formula
       DRV_VXI11=NO
       DRV_USBTMC=YES
       DRV_FTDI=YES
-      DRV_FTDI_USE_LIBFTDI1=YES
+      DRV_FTDI_USE_LIBFTDI1=NO
       TIRPC=YES
     EOS
 

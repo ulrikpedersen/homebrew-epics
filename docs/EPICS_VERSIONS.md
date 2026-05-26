@@ -30,7 +30,7 @@ Update this file whenever a formula version is bumped.
 ```
 epics-base 7.0.10 (R7.0.10)
 │
-├── epics-asyn 4.45 (R4-45)
+├── epics-asyn 4.45 (R4-45)                   [also: epics-calc, epics-seq, epics-sscan]
 │   ├── epics-busy 1.7.4 (R1-7-4)              [also: epics-base]
 │   └── epics-streamdevice 2.8.24 (2.8.24)     [also: epics-base]
 │
@@ -90,13 +90,13 @@ epics-base 7.0.10 (R7.0.10)
 - **Archive URL**: `https://github.com/epics-modules/asyn/archive/refs/tags/R4-45.tar.gz`
 - **Source sha256 (R4-45)**: `1a0c304310709a32c52ba2cfe80976fb0ca9f33c284383eab173329bf5ddf292`
 - **Livecheck regex**: `/^R(\d+(?:-\d+)+)$/i`
-- **Dependencies (build)**: `epics-base`, `libftdi`, `libtirpc`, `libusb`
-- **Dependencies (runtime)**: `epics-base`, `libftdi`, `libtirpc`, `libusb`
+- **Dependencies (build)**: `epics-base`, `epics-calc`, `epics-seq`, `epics-sscan`, `libftdi`, `libtirpc`, `libusb`, `libusb-compat`
+- **Dependencies (runtime)**: `epics-base`, `epics-calc`, `epics-seq`, `epics-sscan`, `libftdi`, `libtirpc`, `libusb`, `libusb-compat`
 - **Installs**: shared libs (libasyn), headers, `.dbd` database files
 - **Build quirks**:
-  - Requires `configure/RELEASE.local` to set `EPICS_BASE`
+  - Requires `configure/RELEASE.local` to set `EPICS_BASE`, `SNCSEQ`, `CALC`, and `SSCAN`
   - Add `configure/CONFIG_SITE.local` to enable feature drivers:
-    `DRV_USBTMC=YES`, `DRV_FTDI=YES`, `DRV_FTDI_USE_LIBFTDI1=YES`, `TIRPC=YES`
+    `DRV_USBTMC=YES`, `DRV_FTDI=YES`, `DRV_FTDI_USE_LIBFTDI1=NO`, `TIRPC=YES`
   - Keep `LINUX_GPIB=NO` and `DRV_VXI11=NO`
 
 ---
