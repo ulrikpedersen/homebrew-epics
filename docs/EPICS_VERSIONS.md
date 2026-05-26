@@ -17,7 +17,7 @@ Update this file whenever a formula version is bumped.
 | `epics-autosave` | 6.0 (`R6-0`) | https://github.com/epics-modules/autosave |
 | `epics-busy` | 1.7.4 (`R1-7-4`) | https://github.com/epics-modules/busy |
 | `epics-calc` | 3.7.5 (`R3-7-5`) | https://github.com/epics-modules/calc |
-| `epics-seq` | 2.2.1 (`seq-2-2-1`) | https://github.com/epics-modules/sequencer |
+| `epics-seq` | 2.2.9 (`R2-2-9`) | https://github.com/epics-modules/sequencer |
 | `epics-sscan` | 2.12 (`R2-12`) | https://github.com/epics-modules/sscan |
 | `epics-std` | 3.6.2 (`R3-6-2`) | https://github.com/epics-modules/std |
 | `epics-streamdevice` | 2.8.24 (`2.8.24`) | https://github.com/paulscherrerinstitute/StreamDevice |
@@ -38,7 +38,7 @@ epics-base 7.0.10 (R7.0.10)
 │
 ├── epics-calc 3.7.5 (R3-7-5)                  [only: epics-base]
 │
-├── epics-seq 2.2.1 (seq-2-2-1)                [only: epics-base]
+├── epics-seq 2.2.9 (R2-2-9)                  [only: epics-base]
 │
 ├── epics-sscan 2.12 (R2-12)                   [also: epics-seq]
 │
@@ -154,8 +154,8 @@ epics-base 7.0.10 (R7.0.10)
 - **GitHub**: https://github.com/epics-modules/sequencer
 - **Homepage**: https://epics-modules.github.io/sequencer/
 - **Description**: EPICS State Notation Language (SNL) sequencer
-- **Tag format**: `seq-<major>-<minor>-<patch>` (e.g. `seq-2-2-1`)
-- **Livecheck regex**: `/^seq-(\d+(?:-\d+)+)$/i`
+- **Tag format**: `R<major>-<minor>-<patch>` (e.g. `R2-2-9`)
+- **Livecheck regex**: `/^R(\d+(?:-\d+)+)$/i`
 - **Dependencies (build)**: `epics-base`
 - **Dependencies (runtime)**: `epics-base`
 - **Installs**: `snc` compiler binary, shared libs (libseq, libpv), headers
