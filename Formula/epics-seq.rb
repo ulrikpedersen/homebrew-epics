@@ -7,6 +7,7 @@ class EpicsSeq < Formula
   url "https://github.com/epics-modules/sequencer/archive/refs/tags/seq-2-2-1.tar.gz"
   version "2.2.1"
   sha256 "6e5b6774e341683fc0405d41abe7eee565f8d4c199e6cd775db391c24bc5c93f"
+  revision 1
 
   livecheck do
     url "https://github.com/epics-modules/sequencer/tags"
