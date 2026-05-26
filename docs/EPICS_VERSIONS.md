@@ -13,7 +13,7 @@ Update this file whenever a formula version is bumped.
 | Formula | Version | Upstream GitHub URL |
 |---------|---------|---------------------|
 | `epics-base` | 7.0.10 (`R7.0.10`) | https://github.com/epics-base/epics-base |
-| `epics-asyn` | 4.44.2 (`R4-44-2`) | https://github.com/epics-modules/asyn |
+| `epics-asyn` | 4.45 (`R4-45`) | https://github.com/epics-modules/asyn |
 | `epics-autosave` | 6.0 (`R6-0`) | https://github.com/epics-modules/autosave |
 | `epics-busy` | 1.7.4 (`R1-7-4`) | https://github.com/epics-modules/busy |
 | `epics-calc` | 3.7.5 (`R3-7-5`) | https://github.com/epics-modules/calc |
@@ -30,7 +30,7 @@ Update this file whenever a formula version is bumped.
 ```
 epics-base 7.0.10 (R7.0.10)
 │
-├── epics-asyn 4.44.2 (R4-44-2)
+├── epics-asyn 4.45 (R4-45)
 │   ├── epics-busy 1.7.4 (R1-7-4)              [also: epics-base]
 │   └── epics-streamdevice 2.8.24 (2.8.24)     [also: epics-base]
 │
@@ -86,14 +86,18 @@ epics-base 7.0.10 (R7.0.10)
 - **GitHub**: https://github.com/epics-modules/asyn
 - **Homepage**: https://epics-modules.github.io/asyn/
 - **Description**: EPICS module for interfacing to synchronous and asynchronous devices
-- **Tag format**: `R<major>-<minor>-<patch>` (e.g. `R4-44-2`)
+- **Tag format**: `R<major>-<minor>` or `R<major>-<minor>-<patch>` (e.g. `R4-45`)
+- **Archive URL**: `https://github.com/epics-modules/asyn/archive/refs/tags/R4-45.tar.gz`
+- **Source sha256 (R4-45)**: `1a0c304310709a32c52ba2cfe80976fb0ca9f33c284383eab173329bf5ddf292`
 - **Livecheck regex**: `/^R(\d+(?:-\d+)+)$/i`
-- **Dependencies (build)**: `epics-base`
-- **Dependencies (runtime)**: `epics-base`
+- **Dependencies (build)**: `epics-base`, `libftdi`, `libtirpc`, `libusb`
+- **Dependencies (runtime)**: `epics-base`, `libftdi`, `libtirpc`, `libusb`
 - **Installs**: shared libs (libasyn), headers, `.dbd` database files
 - **Build quirks**:
-  - Requires patching `configure/RELEASE` to set `EPICS_BASE`
-  - Optional RCSID support (VxWorks only); disable with `RCSID=NO` in configure
+  - Requires `configure/RELEASE.local` to set `EPICS_BASE`
+  - Add `configure/CONFIG_SITE.local` to enable feature drivers:
+    `DRV_USBTMC=YES`, `DRV_FTDI=YES`, `DRV_FTDI_USE_LIBFTDI1=YES`, `TIRPC=YES`
+  - Keep `LINUX_GPIB=NO` and `DRV_VXI11=NO`
 
 ---
 
@@ -228,4 +232,3 @@ epics-base 7.0.10 (R7.0.10)
   - Patch `configure/RELEASE` for all five dependencies
   - Motor's `configure/RELEASE` uses `MOTOR` as a self-referential variable; do not
     accidentally overwrite it
-
