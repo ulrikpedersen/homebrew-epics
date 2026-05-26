@@ -16,7 +16,7 @@ class EpicsSeq < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/ulrikpedersen/epics"
-    sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
+    sha256 arm64_sequoia: "631d4a514e61017bc46c571ca1f34cb09183c7429d3c33004457f96d4dc4407e"
   end
 
   keg_only :versioned_formula
