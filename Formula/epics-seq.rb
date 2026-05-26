@@ -4,14 +4,14 @@
 class EpicsSeq < Formula
   desc "EPICS State Notation Language (SNL) sequencer"
   homepage "https://epics-modules.github.io/sequencer/"
-  url "https://github.com/epics-modules/sequencer/archive/refs/tags/seq-2-2-1.tar.gz"
-  version "2.2.1"
-  sha256 "6e5b6774e341683fc0405d41abe7eee565f8d4c199e6cd775db391c24bc5c93f"
-  revision 1
+  url "https://github.com/epics-modules/sequencer/archive/refs/tags/R2-2-9.tar.gz"
+  version "2.2.9"
+  sha256 "f5ebecdb231e106bb83db9a5fc877adb03bfd119e879a3668fdfc33d0aacb397"
 
   livecheck do
-    url "https://github.com/epics-modules/sequencer/tags"
-    regex(/^seq-(\d+(?:-\d+)+)$/i)
+    url :stable
+    strategy :github_latest
+    regex(/^R(\d+(?:[.-]\d+)+)$/i)
   end
 
   bottle do
