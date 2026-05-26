@@ -14,20 +14,15 @@ class EpicsSscan < Formula
     regex(/^R(\d+(?:[.-]\d+)+)$/i)
   end
 
-  bottle do
-    root_url "https://ghcr.io/v2/ulrikpedersen/epics"
-    sha256 arm64_sequoia: "0000000000000000000000000000000000000000000000000000000000000000"
-  end
-
   keg_only :versioned_formula
 
-  depends_on "epics-base"
-  depends_on "epics-seq"
+  depends_on "ulrikpedersen/epics/epics-base"
+  depends_on "ulrikpedersen/epics/epics-seq"
 
   def install
     (buildpath/"configure/RELEASE.local").write <<~EOS
-      EPICS_BASE=#{Formula["epics-base"].opt_prefix}
-      SNCSEQ=#{Formula["epics-seq"].opt_prefix}
+      EPICS_BASE=#{Formula["ulrikpedersen/epics/epics-base"].opt_prefix}
+      SNCSEQ=#{Formula["ulrikpedersen/epics/epics-seq"].opt_prefix}
     EOS
 
     release = buildpath/"configure/RELEASE"

@@ -21,10 +21,10 @@ class EpicsAsyn < Formula
 
   keg_only :versioned_formula
 
-  depends_on "epics-base"
-  depends_on "epics-calc"
-  depends_on "epics-seq"
-  depends_on "epics-sscan"
+  depends_on "ulrikpedersen/epics/epics-base"
+  depends_on "ulrikpedersen/epics/epics-calc"
+  depends_on "ulrikpedersen/epics/epics-seq"
+  depends_on "ulrikpedersen/epics/epics-sscan"
   depends_on "libftdi"
   depends_on "libtirpc"
   depends_on "libusb"
@@ -32,10 +32,10 @@ class EpicsAsyn < Formula
 
   def install
     (buildpath/"configure/RELEASE.local").write <<~EOS
-      EPICS_BASE=#{Formula["epics-base"].opt_prefix}
-      SNCSEQ=#{Formula["epics-seq"].opt_prefix}
-      CALC=#{Formula["epics-calc"].opt_prefix}
-      SSCAN=#{Formula["epics-sscan"].opt_prefix}
+      EPICS_BASE=#{Formula["ulrikpedersen/epics/epics-base"].opt_prefix}
+      SNCSEQ=#{Formula["ulrikpedersen/epics/epics-seq"].opt_prefix}
+      CALC=#{Formula["ulrikpedersen/epics/epics-calc"].opt_prefix}
+      SSCAN=#{Formula["ulrikpedersen/epics/epics-sscan"].opt_prefix}
     EOS
 
     (buildpath/"configure/CONFIG_SITE.local").write <<~EOS
