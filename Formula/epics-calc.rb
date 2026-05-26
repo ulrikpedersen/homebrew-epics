@@ -5,6 +5,7 @@ class EpicsCalc < Formula
   desc "EPICS calculation records (calc, calcout, sCalc, etc.)"
   homepage "https://epics-modules.github.io/calc/"
   url "https://github.com/epics-modules/calc/archive/refs/tags/R3-7-5.tar.gz"
+  version "3.7.5"
   sha256 "5cf1a7b3d444e763eb96ca5b9cdbcb9c29f5a6f9ac2b8d9cdb17a007d3fa8347"
 
   livecheck do

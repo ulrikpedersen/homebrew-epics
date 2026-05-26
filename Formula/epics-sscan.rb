@@ -5,6 +5,7 @@ class EpicsSscan < Formula
   desc "Scan record and associated software for EPICS"
   homepage "https://epics-modules.github.io/sscan/"
   url "https://github.com/epics-modules/sscan/archive/refs/tags/R2-12.tar.gz"
+  version "2.12"
   sha256 "c6b72b2854f15292f9094375aa9898b711e8d96484dcf2502de854638efe058d"
 
   livecheck do

@@ -171,6 +171,41 @@ It applies the regex and returns the captured group as the version string.
 Homebrew then compares `7-0-10` (captured) with `7.0.10` (formula version) using
 its version normalisation logic, which treats `.` and `-` as equivalent separators.
 
+### EPICS dash-version convention
+
+EPICS upstream tags use dash-separated version numbers with an `R` prefix (e.g.
+`R3-7-5`, `R6-0`) or a module-specific prefix (e.g. `seq-2-2-1`). Without an
+explicit `version` field, Homebrew auto-detects the version from the archive URL
+and may produce a truncated result (e.g. `3.7` instead of `3.7.5`) because it
+stops parsing at the first ambiguous dash.
+
+The livecheck regex capture group correctly extracts the full numeric portion
+(`3-7-5`). Homebrew then normalises dashes to dots during version comparison, so
+`3-7-5 == 3.7.5`. However, if the auto-detected formula version is only `3.7`, the
+comparison `3.7.5 > 3.7` is true — but this is a **false positive**: the formula
+already packages `3.7.5` (that is what the URL downloads), so there is no real
+update to apply. `bump-formula-pr` then constructs a broken URL by performing a
+string substitution of `3.7.5` into a URL that only contains the partial string `3.7`.
+
+**Rule:** For any formula whose source URL tag uses dashes as version separators,
+always declare an explicit `version` in dot notation **between `url` and `sha256`**
+(i.e. immediately after `url`, immediately before `sha256`):
+
+```ruby
+url "https://github.com/epics-modules/calc/archive/refs/tags/R3-7-5.tar.gz"
+version "3.7.5" # required: prevents livecheck false positives from dash-style tags
+sha256 "..."
+```
+
+Placing `version` after `url` (not after `sha256`) matters because
+`brew bump-formula-pr` substitutes the `url` and `version` fields together as an
+atomic pair. If `version` is elsewhere in the file the substitution produces
+incorrect or duplicate entries.
+
+This applies to tags like `R6-0` → `version "6.0"`, `R3-7-5` → `version "3.7.5"`,
+`seq-2-2-1` → `version "2.2.1"`, etc. Formulae whose URLs already contain
+dot-separated versions (e.g. `base-7.0.10.tar.gz`) do not need this override.
+
 ### Checking livecheck locally
 
 ```sh
@@ -213,7 +248,7 @@ Common audit failures in EPICS formulae and how to fix them:
 | `Bottle block is missing` | Add a `bottle do ... end` block |
 | `undefined method 'cellar'` | Remove the `cellar` line — it was removed in Homebrew 4.x |
 | `Invalid sha256 hash` | Bottle sha256 placeholders must be 64-character hex; use all-zeros |
-| `version X.Y.Z is redundant with version scanned from URL` | Remove the `version` line when Homebrew can parse it from the URL |
+| `version X.Y.Z is redundant with version scanned from URL` | Only remove `version` when the URL already contains a dot-separated version (e.g. `base-7.0.10.tar.gz`). Keep it for dash-separated EPICS tags — see [EPICS dash-version convention](#epics-dash-version-convention) |
 | `Use assert_path_exists` | Replace `assert_predicate <path>, :exist?` with `assert_path_exists <path>` |
 | `Prefer 'to_s' over string interpolation` | Use `epics_arch.to_s` in Pathname chains instead of `"#{epics_arch}"` |
 | `Depends on formula in same tap without tap name` | Use `depends_on "epics-asyn"` (no tap prefix needed within the tap) |

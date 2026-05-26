@@ -44,7 +44,7 @@ Once the docs are current, collect the following from them:
 Copy the structure from [exemplar-formula.rb](exemplar-formula.rb) and adapt:
 
 - Rename the class to match the filename: `epics-asyn.rb` → `class EpicsAsyn`
-- Set `desc`, `homepage`, `url`, `sha256`, `version`
+- Set `desc`, `homepage`, `url`, `version` (for dash-style tags), `sha256`
 - Add the `livecheck` block immediately after `version`
 - Add the `bottle do` block
 - Add `keg_only :versioned_formula`
@@ -238,8 +238,8 @@ Before finishing a formula, confirm every item is present:
 - [ ] `desc` — one sentence, no trailing period, ≤ 80 chars
 - [ ] `homepage` — HTTPS URL for the module's documentation or GitHub page
 - [ ] `url` — HTTPS GitHub archive URL using the exact tag from EPICS_VERSIONS.md
+- [ ] `version` — dotted version string (e.g. `"4.44.2"`), placed immediately after `url` and before `sha256`; **required** when the tag uses dash-separated numbers (e.g. `R4-44-2`); omit when the URL already contains a dot-separated version (e.g. `base-7.0.10.tar.gz`)
 - [ ] `sha256` — SHA256 of the source tarball
-- [ ] `version` — dotted version string (e.g. `"4.44.2"`)
 - [ ] `livecheck` block with `:github_latest` strategy and correct regex
 - [ ] `bottle do` block with `root_url` and all six platform sha256 entries as valid 64-char hex (no `cellar` line)
 - [ ] `keg_only :versioned_formula` (required for Base/support modules; omit for GUI app formulae)
@@ -261,7 +261,8 @@ Before finishing a formula, confirm every item is present:
 | sha256 placeholder is not valid hex (e.g. `"placeholder_until_ci_runs"`) | Use a 64-character hex string such as all-zeros |
 | `test do` uses `assert_predicate <path>, :exist?` | Use `assert_path_exists <path>` |
 | `test do` uses `"#{epics_arch}"` inside a Pathname chain | Use `epics_arch.to_s` |
-| Including a redundant `version` line when Homebrew can parse it from the URL | Omit `version` — audit flags it as redundant |
+| Placing `version` after `sha256` instead of before it | `version` must go immediately after `url` and before `sha256`; `brew bump-formula-pr` expects this order |
+| Including a redundant `version` line when Homebrew can parse it from the URL | Omit `version` — audit flags it as redundant; only include it for dash-separated tags |
 | Leaving `AUTOSAVE=`, `SSCAN=` etc. pointing at nonexistent paths | Comment them out |
 | `depends_on "gcc"` | Remove — use Apple Clang |
 | Hardcoding `/opt/homebrew` | Use `Formula[...].opt_prefix` or `opt_prefix` |
